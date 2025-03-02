@@ -16,6 +16,8 @@ def ejecutar_todos():
 def ejecutar_test_listas():
     os.system("python3.13 DataStructures/List/Tests/test_array_list.py")
     os.system("python3.13 DataStructures/List/Tests/test_single_linked_list.py")
+    os.system("python3.13 DataStructures/List/Tests/test_list_iterator.py")
+
 
 def ejecutar_test_stacks():
     os.system("python3.13 DataStructures/Stack/Tests/test_stack.py")

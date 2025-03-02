@@ -1,20 +1,14 @@
 import sys
-import App.logic as logic
-sys.setrecursionlimit(10000)  # Ajustar límite de recursión si es necesario
 
-
+default_limit=1000
+sys.setrecursionlimit(default_limit*10)
 
 def new_logic():
-    
-    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    
     """
         Se crea una instancia del controlador
     """
-    control = logic.new_logic()
-    return control
-
-
+    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
+    pass
 
 def print_menu():
     print("Bienvenido")
@@ -30,14 +24,11 @@ def print_menu():
     print("0- Salir")
 
 def load_data(control):
-    #TODO: Realizar la carga de datos
-    
     """
     Carga los datos
     """
-    agricultural_records = logic.load_data(control)
-    return agricultural_records
-
+    #TODO: Realizar la carga de datos
+    pass
 
 
 def print_data(control, id):
@@ -127,7 +118,6 @@ def main():
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
             data = load_data(control)
-            print('Registros cargados: ' + str(data))
         elif int(inputs) == 2:
             print_req_1(control)
 
