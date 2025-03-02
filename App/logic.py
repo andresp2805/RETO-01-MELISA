@@ -211,11 +211,33 @@ def req_1(catalog, anio_interes):
         current_timestamp = datetime.strptime(record['load_time'], "%Y-%m-%d %H:%M:%S").timestamp()
         if current_timestamp > max_load_time:
             max_load_time = current_timestamp
-            most_recent_record = record
-    
+            most_recent_record = record    
+    if most_recent_record is not None:
+        dt = datetime.strptime(most_recent_record['load_time'], "%Y-%m-%d %H:%M:%S")
+        record_formateado = {
+            'year_collection': str(most_recent_record['year_collection']),
+            'load_time': dt.strftime("%Y-%m-%d"),
+            'source': most_recent_record['source'],
+            'freq_collection': most_recent_record['freq_collection'],
+            'state_name': most_recent_record['state_name'],
+            'commodity': most_recent_record['commodity'],
+            'unit_measurement': most_recent_record['unit_measurement'],
+            'value': most_recent_record['value']
+        }
+    else:
+        record_formateado = {
+            'year_collection': None,
+            'load_time': None,
+            'source': None,
+            'freq_collection': None,
+            'state_name': None,
+            'commodity': None,
+            'unit_measurement': None,
+            'value': None
+        }
     end = get_time()
     elapsed = delta_time(start, end)
-    return elapsed, funcs["size"](records_filtrado), most_recent_record
+    return elapsed, funcs["size"](records_filtrado), record_formateado
 
 def req_2(catalog, departamento_interes):
     """
@@ -235,12 +257,32 @@ def req_2(catalog, departamento_interes):
         if current_timestamp > max_load_time:
             max_load_time = current_timestamp
             most_recent_record = record
-    
+    if most_recent_record is not None:
+        dt = datetime.strptime(most_recent_record['load_time'], "%Y-%m-%d %H:%M:%S")
+        record_formateado = {
+            'year_collection': str(most_recent_record['year_collection']),
+            'load_time': dt.strftime("%Y-%m-%d"),
+            'source': most_recent_record['source'],
+            'freq_collection': most_recent_record['freq_collection'],
+            'state_name': most_recent_record['state_name'],
+            'commodity': most_recent_record['commodity'],
+            'unit_measurement': most_recent_record['unit_measurement'],
+            'value': most_recent_record['value']
+        }
+    else:
+        record_formateado = {
+            'year_collection': None,
+            'load_time': None,
+            'source': None,
+            'freq_collection': None,
+            'state_name': None,
+            'commodity': None,
+            'unit_measurement': None,
+            'value': None
+        }
     end = get_time()
     elapsed = delta_time(start, end)
-    return elapsed, funcs["size"](records_filtrado), most_recent_record
-
-
+    return elapsed, funcs["size"](records_filtrado), record_formateado
 
 def req_3(catalog):
     """
@@ -248,7 +290,6 @@ def req_3(catalog):
     """
     # TODO: Modificar el requerimiento 3
     pass
-
 
 def req_4(catalog):
     """
