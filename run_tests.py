@@ -32,27 +32,30 @@ def ejecutar_test_sorting():
     
 def main():
     print("Seleccione el test a ejecutar:")
-    print("0 - Todos")
-    print("1 - Listas")
-    print("2 - Stacks")
-    print("3 - Queue")
-    print("4 - Sorting")
+    print("1 - Todos")
+    print("2 - Listas")
+    print("3 - Stacks")
+    print("4 - Queue")
+    print("5 - Sorting")
+    print("0 - Salir")
     
-    opcion = input("Ingrese una opción (0/1/2/3/4): ").strip()
-    
-    if opcion == "0":
-        ejecutar_todos()
-    elif opcion == "1":
-        ejecutar_test_listas()
-    elif opcion == "2":
-        ejecutar_test_stacks()
-    elif opcion == "3":
-        ejecutar_test_queue()
-    elif opcion == "4":
-        ejecutar_test_sorting()
-    else:
-        print("Opción no válida. Intente de nuevo.")
+    opcion = input("Ingrese una opción: ")
+    if opcion != "0":
+        if opcion == "1":
+            ejecutar_todos()
+        elif opcion == "2":
+            ejecutar_test_listas()
+        elif opcion == "3":
+            ejecutar_test_stacks()
+        elif opcion == "4":
+            ejecutar_test_queue()
+        elif opcion == "5":
+            ejecutar_test_sorting()
+        else:
+            print("Opción no válida. Intente de nuevo.")
         main()
+    else:
+        print("Hasta Luego.")
 
 if __name__ == '__main__':
     main()
