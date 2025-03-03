@@ -136,7 +136,7 @@ def get_max_year(catalog):
             lowest = i['year_collection']
     return lowest
 
-def get_first_last_info(catalog):
+def get_first_last_info(records, requerimiento = "carga_datos"):
     """
     Retorna una nueva lista (del mismo tipo que la original) que contiene los primeros 5 y 
     los últimos 5 registros con la siguiente información:
@@ -149,19 +149,45 @@ def get_first_last_info(catalog):
     
     Si la lista original tiene 10 o menos registros, se retornan todos.    
     """
-    records = catalog['agricultural_records']
     funcs = get_list_functions(records)
     total = funcs["size"](records)
     new_list_ret = funcs["new_list"]()
     def extract_info(record):
-        return {
-            'year_collection': record.get('year_collection'),
-            'load_time': record.get('load_time'),
-            'state_name': record.get('state_name'),
-            'source': record.get('source'),
-            'unit_measurement': record.get('unit_measurement'),
-            'value': record.get('value')
-        }
+        if requerimiento == "carga_datos":
+            return {
+                'year_collection': record['year_collection'],
+                'load_time': record['load_time'],
+                'state_name': record['state_name'],
+                'source': record['source'],
+                'unit_measurement': record['unit_measurement'],
+                'value': record['value']
+            }
+        elif requerimiento == "req_3":
+            dt = datetime.strptime(record['load_time'], "%Y-%m-%d %H:%M:%S")
+            return {
+                'source': record['source'],
+                'year_collection': record['year_collection'],
+                'load_time': dt.strftime("%Y-%m-%d"),
+                'freq_collection': record['freq_collection'],
+                'commodity': record['commodity'],
+                'unit_measurement': record.get('unit_measurement')
+            }
+        else:
+            return {
+                'source': record['source'],
+                'commodity': record['commodity'],
+                'statical_category': record['statical_category'],
+                'source': record['source'],
+                'unit_measurement': record['unit_measurement'],
+                'state_name': record['state_name'],
+                'location': record['location'],
+                'year_collection': record['year_collection'],
+                'freq_collection': record['freq_collection'],
+                'reference_period': record['reference_period'],
+                'load_time': record['load_time'],
+                'value': record['value'],
+            }
+            
     if total <= 10:
         for i in range(total):
             rec = funcs["get_element"](records, i)
@@ -176,8 +202,7 @@ def get_first_last_info(catalog):
     return new_list_ret
 
 # Funciones de consulta sobre el catálogo
-def filtrar_por_año(catalog, anio_inicial, anio_final):
-    records = catalog['agricultural_records']
+def filtrar_por_año(records, anio_inicial, anio_final):
     funcs = get_list_functions(records)
     lista = funcs["new_list"]()
     for registro in iterator(records):
@@ -185,8 +210,7 @@ def filtrar_por_año(catalog, anio_inicial, anio_final):
             funcs["add_last"](lista, registro)
     return lista
 
-def filtrar_por_departamento(catalog, departamento):
-    records = catalog['agricultural_records']
+def filtrar_por_departamento(records, departamento):
     funcs = get_list_functions(records)
     lista = funcs["new_list"]()
     for registro in iterator(records):
@@ -200,11 +224,9 @@ def req_1(catalog, anio_interes):
     """
     # TODO: Modificar el requerimiento 1
     start = get_time()
-    
     records = catalog['agricultural_records']
     funcs = get_list_functions(records)
-    records_filtrado = filtrar_por_año(catalog, anio_interes, anio_interes)
-    
+    records_filtrado = filtrar_por_año(records, anio_interes, anio_interes) 
     most_recent_record = None
     max_load_time = float('-inf') 
     for record in iterator(records_filtrado):
@@ -245,11 +267,9 @@ def req_2(catalog, departamento_interes):
     """
     # TODO: Modificar el requerimiento 2
     start = get_time()
-    
     records = catalog['agricultural_records']
     funcs = get_list_functions(records)
-    records_filtrado = filtrar_por_departamento(catalog, departamento_interes)
-    
+    records_filtrado = filtrar_por_departamento(records, departamento_interes)
     most_recent_record = None
     max_load_time = float('-inf') 
     for record in iterator(records_filtrado):
@@ -284,12 +304,26 @@ def req_2(catalog, departamento_interes):
     elapsed = delta_time(start, end)
     return elapsed, funcs["size"](records_filtrado), record_formateado
 
-def req_3(catalog):
+def req_3(catalog, departamento_interes, anio_inicio, anio_fin):
     """
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
-    pass
+    start = get_time()
+    records = catalog['agricultural_records']
+    funcs = get_list_functions(records)
+    records_filtrado = filtrar_por_departamento(records, departamento_interes)
+    records_filtrado = filtrar_por_año(records_filtrado, anio_inicio, anio_fin)
+    num_surveys = 0
+    num_census = 0
+    for record in iterator(records_filtrado):
+        if record['source'] == 'SURVEY':
+            num_surveys += 1
+        elif record['source'] == 'CENSUS':
+            num_census += 1
+    end = get_time()
+    elapsed = delta_time(start, end)
+    return elapsed, funcs["size"](records_filtrado), num_surveys, num_census, records_filtrado
 
 def req_4(catalog):
     """
