@@ -162,7 +162,7 @@ def get_first_last_info(records, requerimiento = "carga_datos"):
                 'unit_measurement': record['unit_measurement'],
                 'value': record['value']
             }
-        elif requerimiento == "req_3":
+        elif requerimiento == "req_3_4_5":
             dt = datetime.strptime(record['load_time'], "%Y-%m-%d %H:%M:%S")
             return {
                 'source': record['source'],
@@ -371,7 +371,7 @@ def req_5(catalog, categoria_estadistica, anio_inicio, anio_fin):
     start = get_time()
     records = catalog['agricultural_records']
     funcs = get_list_functions(records)
-    records_filtrado = filtrar_por_producto(records, categoria_estadistica)
+    records_filtrado = filtrar_por_categoria_estadistica(records, categoria_estadistica)
     records_filtrado = filtrar_por_año(records_filtrado, anio_inicio, anio_fin)
     num_surveys = 0
     num_census = 0
@@ -383,6 +383,10 @@ def req_5(catalog, categoria_estadistica, anio_inicio, anio_fin):
     end = get_time()
     elapsed = delta_time(start, end)
     return elapsed, funcs["size"](records_filtrado), num_surveys, num_census, records_filtrado
+catalog = new_logic()
+load_data(catalog, '/agricultural-20.csv')
+
+print(req_5(catalog, "INVENTORY", 2007, 2010))
 
 def req_6(catalog):
     """
