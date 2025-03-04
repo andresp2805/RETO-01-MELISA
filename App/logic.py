@@ -217,6 +217,22 @@ def filtrar_por_departamento(records, departamento):
         if registro['state_name'] == departamento:
             funcs["add_last"](lista, registro)
     return lista
+
+def filtrar_por_producto(records, producto):
+    funcs = get_list_functions(records)
+    lista = funcs["new_list"]()
+    for registro in iterator(records):
+        if registro['commodity'] == producto:
+            funcs["add_last"](lista, registro)
+    return lista
+
+def filtrar_por_categoria_estadistica(records, categoria):
+    funcs = get_list_functions(records)
+    lista = funcs["new_list"]()
+    for registro in iterator(records):
+        if registro['statical_category'] == categoria:
+            funcs["add_last"](lista, registro)
+    return lista
     
 def req_1(catalog, anio_interes):
     """
@@ -325,20 +341,48 @@ def req_3(catalog, departamento_interes, anio_inicio, anio_fin):
     elapsed = delta_time(start, end)
     return elapsed, funcs["size"](records_filtrado), num_surveys, num_census, records_filtrado
 
-def req_4(catalog):
+def req_4(catalog, tipo_producto, anio_inicio, anio_fin):
     """
     Retorna el resultado del requerimiento 4
     """
     # TODO: Modificar el requerimiento 4
-    pass
+    start = get_time()
+    records = catalog['agricultural_records']
+    funcs = get_list_functions(records)
+    records_filtrado = filtrar_por_producto(records, tipo_producto)
+    records_filtrado = filtrar_por_año(records_filtrado, anio_inicio, anio_fin)
+    num_surveys = 0
+    num_census = 0
+    for record in iterator(records_filtrado):
+        if record['source'] == 'SURVEY':
+            num_surveys += 1
+        elif record['source'] == 'CENSUS':
+            num_census += 1
+    end = get_time()
+    elapsed = delta_time(start, end)
+    return elapsed, funcs["size"](records_filtrado), num_surveys, num_census, records_filtrado
 
 
-def req_5(catalog):
+def req_5(catalog, categoria_estadistica, anio_inicio, anio_fin):
     """
     Retorna el resultado del requerimiento 5
     """
     # TODO: Modificar el requerimiento 5
-    pass
+    start = get_time()
+    records = catalog['agricultural_records']
+    funcs = get_list_functions(records)
+    records_filtrado = filtrar_por_producto(records, categoria_estadistica)
+    records_filtrado = filtrar_por_año(records_filtrado, anio_inicio, anio_fin)
+    num_surveys = 0
+    num_census = 0
+    for record in iterator(records_filtrado):
+        if record['source'] == 'SURVEY':
+            num_surveys += 1
+        elif record['source'] == 'CENSUS':
+            num_census += 1
+    end = get_time()
+    elapsed = delta_time(start, end)
+    return elapsed, funcs["size"](records_filtrado), num_surveys, num_census, records_filtrado
 
 def req_6(catalog):
     """
