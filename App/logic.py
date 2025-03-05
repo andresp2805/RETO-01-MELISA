@@ -10,10 +10,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from DataStructures.List import array_list as al
 from DataStructures.List import single_linked_list as sl
-from DataStructures.List import list_node as ln
 from DataStructures.List.list_iterator import iterator
-from DataStructures.Queue import queue as q
-from DataStructures.Stack import stack as s
+
 
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/'
 
@@ -114,7 +112,8 @@ def load_data(catalog, filename):
         for row in input_file:
             row['year_collection'] = int(row['year_collection'])
             funcs["add_last"](records, row)
-    return funcs["size"](records)
+    records_return = get_first_last_info(records)
+    return funcs["size"](records), records_return
 
 def get_min_year(catalog):
     """
@@ -244,10 +243,10 @@ def filtrar_por_año(records, anio_inicial, anio_final):
 def filtrar_por_fecha(records, fecha_inicial, fecha_final):
     funcs = get_list_functions(records)
     lista = funcs["new_list"]()
-    fecha_i = datetime.strptime(fecha_inicial, "%Y-%m-%d %H:%M:%S").timestamp()
-    fecha_f = datetime.strptime(fecha_final, "%Y-%m-%d %H:%M:%S").timestamp()
+    fecha_i = datetime.strptime(fecha_inicial + " 00:00:00", "%Y-%m-%d %H:%M:%S")
+    fecha_f = datetime.strptime(fecha_final + " 23:59:59", "%Y-%m-%d %H:%M:%S")
     for registro in iterator(records):
-        fecha_r = datetime.strptime(registro['load_time'], "%Y-%m-%d %H:%M:%S").timestamp()
+        fecha_r = datetime.strptime(registro['load_time'], "%Y-%m-%d %H:%M:%S")
         if fecha_i <= fecha_r <= fecha_f:
             funcs["add_last"](lista, registro)
     return lista
@@ -275,7 +274,15 @@ def filtrar_por_categoria_estadistica(records, categoria):
         if registro['statical_category'] == categoria:
             funcs["add_last"](lista, registro)
     return lista
-    
+
+def filtrar_por_unidad_de_medida(records):
+    funcs = get_list_functions(records)
+    lista = funcs["new_list"]()
+    for registro in iterator(records):
+        if "$" in registro['unit_measurement']:
+            funcs["add_last"](lista, registro)
+    return lista
+
 def req_1(catalog, anio_interes):
     """
     Retorna el resultado del requerimiento 1
@@ -450,13 +457,76 @@ def req_6(catalog, departamento_interes, fecha_inicio, fecha_fin):
     elapsed = delta_time(start, end)
     return elapsed, funcs["size"](records_filtrado), num_surveys, num_census, records_return
 
-def req_7(catalog):
+def req_7(catalog, departamento_interes, anio_inicio, anio_fin):
     """
     Retorna el resultado del requerimiento 7
     """
     # TODO: Modificar el requerimiento 7
-    pass
-
+    start = get_time()
+    records = catalog['agricultural_records']
+    funcs = get_list_functions(records)
+    records_filtrado = filtrar_por_año(records, anio_inicio, anio_fin)
+    records_filtrado = filtrar_por_departamento(records_filtrado, departamento_interes)
+    records_filtrado = filtrar_por_unidad_de_medida(records_filtrado)
+    
+    grupos = {}  # clave: año, valor: diccionario con acumulados
+    for registro in iterator(records_filtrado):
+        anio = registro['year_collection']
+        if anio not in grupos:
+            grupos[anio] = {
+                "income": 0.0,
+                "count": 0,
+                "invalid": 0,
+                "survey": 0,
+                "census": 0
+            }
+        valor_str = registro['value']
+        try:
+            valor_numerico = float(valor_str.replace(",", "").strip())
+            grupos[anio]["income"] += valor_numerico
+        except Exception:
+            grupos[anio]["invalid"] += 1
+        grupos[anio]["count"] += 1
+        if registro['source'] == "SURVEY":
+            grupos[anio]["survey"] += 1
+        elif registro['source'] == "CENSUS":
+            grupos[anio]["census"] += 1
+    
+    if not grupos:
+        resultado_max = {
+            "year_collection": None,
+            "period_type": None,
+            "income": None,
+            "count": None,
+            "invalid": None,
+            "survey": None,
+            "census": None
+        }
+        resultado_min = resultado_max.copy()
+    else:
+        anio_max = max(grupos, key=lambda a: grupos[a]["income"])
+        anio_min = min(grupos, key=lambda a: grupos[a]["income"])
+        resultado_max = {
+                "year_collection": str(anio_max),
+                "period_type": "MAYOR",
+                "income": grupos[anio_max]["income"],
+                "count": grupos[anio_max]["count"],
+                "invalid": grupos[anio_max]["invalid"],
+                "survey": grupos[anio_max]["survey"],
+                "census": grupos[anio_max]["census"]
+        }
+        resultado_min = {
+            "year_collection": str(anio_min),
+            "period_type": "MENOR",
+            "income": grupos[anio_min]["income"],
+            "count": grupos[anio_min]["count"],
+            "invalid": grupos[anio_min]["invalid"],
+            "survey": grupos[anio_min]["survey"],
+            "census": grupos[anio_min]["census"]
+        }
+    end = get_time()
+    elapsed = delta_time(start, end)
+    return elapsed, funcs["size"](records_filtrado), resultado_max, resultado_min
 
 def req_8(catalog):
     """
